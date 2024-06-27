@@ -8,7 +8,7 @@ const jwt = require("jsonwebtoken")
 const aauth = require("../middleware/aauth")
 const Category = require("../model/categories")
 const Product = require("../model/products")
-
+const Order = require("../model/orders")
 
 
 
@@ -202,6 +202,21 @@ router.get("/user",aauth,async(req,resp)=>{
     }
 })
 
+
+router.get("/userorder",aauth,async(req,resp)=>{
+    try {
+
+        const order = await Order.find().populate("uid").populate("Product.pid")
+
+        console.log(order);
+        
+
+        resp.render("orders",{"orders":order})
+
+    } catch (error) {
+        console.log(error);
+    }
+})
 
 
 

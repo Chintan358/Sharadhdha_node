@@ -7,6 +7,7 @@ const Category = require("../model/categories")
 const Product = require("../model/products")
 const Cart = require("../model/carts")
 const Razorpay = require('razorpay');
+const Order = require("../model/orders")
 router.get("/",(req,resp)=>{
     resp.redirect("index")
 })
@@ -211,9 +212,36 @@ router.get("/payment",(req,resp)=>{
 
 })
 
-router.get("/order",(req,resp)=>{
+router.get("/order",auth,async(req,resp)=>{
 
+    try {
+    const user = req.user
+    const payid = req.query.payid;
+    const cartData = await Cart.find({uid:user._id}).populate("pid")
+
+    var prod = [];
+    for(var i=0;i<cartData.length;i++)
+    {
+       var pid = cartData[i].pid._id
+       var price = cartData[i].pid.price
+       var qty = cartData[i].qty
+       prod.push({
+        pid :pid,
+        price :price,
+        qty :qty})
+    }
+   
+    const order = new Order({uid:user._id,payid:payid,Product:prod})
+    const odata = await order.save()
+    console.log(odata);
+    await Cart.deleteMany({uid:user._id})
     resp.send("Order confirmd!!!")
+    } catch (error) {
+        console.log(error);
+    }
+    
+
+   
 })
 
 
